@@ -10,6 +10,7 @@
 
     .principal {
         flex: 1; //  para forzar a que el componente "principal" toome todo el espacio disponible
+        overflow: scroll;
     }
 
     .contenido {
