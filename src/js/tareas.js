@@ -61,11 +61,17 @@
             );
             btnEstadoTarea.textContent = estados[tarea.estado];
             btnEstadoTarea.dataset.estadoTarea = tarea.estado;
+            btnEstadoTarea.ondblclick = function () {
+                cambiarEstadoTarea({ ...tarea }); // ->para evittar que modifique el areglo de tareas mando una copia de la tarea, para no modificar el array tareas; {...tarea}
+            };
 
             const btnEliminarTarea = document.createElement("BUTTON");
             btnEliminarTarea.classList.add("eliminar-tarea");
             btnEliminarTarea.dataset.idTarea = tarea.id;
             btnEliminarTarea.textContent = "Elminar";
+            btnEliminarTarea.ondblclick = function () {
+                confirmarEliminarTarea({ ...tarea });
+            };
 
             opcionesDiv.appendChild(btnEstadoTarea);
             opcionesDiv.appendChild(btnEliminarTarea);
@@ -200,7 +206,105 @@
                 tareas = [...tareas, tareaObj];
                 mostrarTareas();
 
-                console.log(tareaObj);
+                // console.log(tareaObj);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function cambiarEstadoTarea(tarea) {
+        const nuevoEstado = tarea.estado === "1" ? "0" : "1";
+        tarea.estado = nuevoEstado;
+        actualizarTarea(tarea);
+    }
+
+    async function actualizarTarea(tarea) {
+        // la tarea es una copia {...tarea}
+        const { estado, id, nombre, proyectoId } = tarea;
+        const datos = new FormData();
+        datos.append("id", id);
+        datos.append("nombre", nombre);
+        datos.append("estado", estado);
+        datos.append("proyectoURL", obtenerProyecto());
+
+        try {
+            const url = "http://localhost:8000/api/tarea/actualizar";
+            const respuesta = await fetch(url, {
+                method: "POST",
+                body: datos,
+            });
+            const resultado = await respuesta.json();
+
+            console.log(resultado);
+
+            if (resultado.respuesta.tipo === "exito") {
+                console.log(resultado.respuesta.mensaje);
+                mostrarAlerta(
+                    resultado.respuesta.mensaje,
+                    resultado.respuesta.tipo,
+                    document.querySelector(".contenedor-nueva-tarea")
+                );
+
+                tareas = tareas.map((tareaMemoria) => {
+                    if (tareaMemoria.id === id) {
+                        tareaMemoria.estado = estado;
+                    }
+                    return tareaMemoria;
+                });
+                // console.log(tareas);
+                mostrarTareas();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        // console.log(tarea);
+    }
+
+    function confirmarEliminarTarea(tarea) {
+        Swal.fire({
+            title: "Elminar Tarea?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                elminarTarea(tarea);
+            }
+        });
+    }
+
+    async function elminarTarea(tarea) {
+        const { estado, id, nombre } = tarea;
+        const datos = new FormData();
+        datos.append("id", id);
+        datos.append("nombre", nombre);
+        datos.append("estado", estado);
+        datos.append("proyectoURL", obtenerProyecto());
+        try {
+            const url = "http://localhost:8000/api/tarea/eliminar";
+            const respuesta = await fetch(url, {
+                method: "POST",
+                body: datos,
+            });
+
+            const resultado = await respuesta.json();
+            if (resultado.resultado) {
+                // mostrarAlerta(
+                //     resultado.mensaje,
+                //     resultado.tipo,
+                //     document.querySelector(".contenedor-nueva-tarea")
+                // );
+
+                Swal.fire("Elminidado", resultado.mensaje, "success");
+
+                tareas = tareas.filter(
+                    (tareaMemoria) => tareaMemoria.id !== tarea.id
+                );
+                mostrarTareas();
             }
         } catch (error) {
             console.log(error);
