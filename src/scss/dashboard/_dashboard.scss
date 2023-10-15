@@ -10,7 +10,9 @@
 
     .principal {
         flex: 1; //  para forzar a que el componente "principal" toome todo el espacio disponible
-        overflow: scroll;
+        @include m.tablet {
+            overflow: scroll;
+        }
     }
 
     .contenido {
@@ -34,6 +36,13 @@
             font-weight: bold;
             font-size: 1.4rem;
             border-radius: 1rem;
+        }
+    }
+
+    .enlace {
+        color: v.$indigo;
+        &:hover {
+            color: darken($color: v.$indigo, $amount: 20%);
         }
     }
 }

@@ -10,4 +10,8 @@
     input[type="submit"] {
         @include m.boton(v.$rosa, v.$blanco);
     }
+
+    .acciones a {
+        color: v.$rosa;
+    }
 }

@@ -18,7 +18,7 @@
             <input type="submit" class="boton" value="Iniciar Sesión">
         </form>
         <div class="acciones">
-            <a href="/crear">¿Aún no tienes una cuneta? Obtener una</a>
+            <a href="/crear">¿Aún no tienes una cuenta? Obtener una</a>
             <a href="/olvide">¿Olvidaste tu Password?</a>
         </div>
     </div><!-- .contenedor-sm -->

@@ -12,6 +12,8 @@ class Usuario extends ActiveRecord
     public $email;
     public $password;
     public $password2;
+    public $password_actual;
+    public $password_nuevo;
     public $token;
     public $confirmado;
 
@@ -22,6 +24,8 @@ class Usuario extends ActiveRecord
         $this->email = $args['email'] ?? '';
         $this->password = $args['password'] ?? '';
         $this->password2 = $args['password2'] ?? null;
+        $this->password_actual = $args['password_actual'] ?? null;
+        $this->password_nuevo = $args['password_nuevo'] ?? null;
         $this->token = $args['token'] ?? '';
         $this->confirmado = $args['confirmado'] ?? 0;
     }
@@ -96,14 +100,50 @@ class Usuario extends ActiveRecord
         return self::$alertas;
     }
 
+    public function validar_perfil()
+    {
+        if (!$this->nombre) {
+            self::$alertas['error'][] = 'El Nombre es Obligatorio';
+        }
+
+        if (!$this->email) {
+            self::$alertas['error'][] = 'El Email es Obligatorio';
+        }
+        return self::$alertas;
+    }
+
+    // Validar passowrd nuevo
+    public function nuevo_password(): array
+    {
+        if (!$this->password_actual) {
+            self::$alertas['error'][] = 'El Password Actual no puede ir vacio';
+        }
+
+        if (!$this->password_nuevo) {
+            self::$alertas['error'][] = 'El Password nuevo no puede ir vacio';
+        }
+
+        if (strlen($this->password_nuevo) < 6) {
+            self::$alertas['error'][] = 'El Password deber contener almenos 6 caracteres';
+        }
+
+        return self::$alertas;
+    }
+
+    // Comprobar password
+    public function comprobar_password(): bool
+    {
+        return password_verify($this->password_actual, $this->password); // ->retorna un true o false
+    }
+
     // encripta el pasword
-    public function encriptarPassword()
+    public function encriptarPassword(): void
     {
         $this->password = password_hash($this->password, PASSWORD_BCRYPT);
     }
 
     // Generar un tocken
-    public function crearToken()
+    public function crearToken(): void
     {
         $this->token = uniqid();
     }
